@@ -1,32 +1,46 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [backendStatus, setBackendStatus] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Try to fetch from backend API
+    fetch('http://localhost:3000/api/health')
+      .then(res => res.json())
+      .then(data => {
+        setBackendStatus(data)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error('Backend not reachable:', err)
+        setLoading(false)
+      })
+  }, [])
 
   return (
     <>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <h1>🏃 RoadRunner</h1>
+        <p>Full-stack application with React frontend and Express backend</p>
       </div>
-      <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+        <h2>Backend Status</h2>
+        {loading ? (
+          <p>Checking backend connection...</p>
+        ) : backendStatus ? (
+          <div>
+            <p style={{ color: 'green' }}>✓ Backend is running</p>
+            <p>Status: {backendStatus.status}</p>
+            <p>Time: {new Date(backendStatus.timestamp).toLocaleString()}</p>
+          </div>
+        ) : (
+          <p style={{ color: 'orange' }}>⚠ Backend not reachable. Make sure to start the backend server.</p>
+        )}
       </div>
       <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+        Edit <code>src/App.jsx</code> to customize the frontend
       </p>
     </>
   )
